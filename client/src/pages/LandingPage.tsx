@@ -11,6 +11,9 @@ export const LandingPage = () => {
   const [code, setCode] = useState<string>("");
   const [isCodeValid, setCodeValid] = useState<boolean>(false);
   const [requirements, setRequirements] = useState<string[]>([]);
+  const deployMateHeader =
+  "#######################################################################################################################################\n#                               *****      *****      *****      DEPLOYMATE      *****      *****      *****                          #\n#######################################################################################################################################\n\n # enter your code below:\n\n";
+
 
   useEffect(() => {
     if (code) {
@@ -23,48 +26,66 @@ export const LandingPage = () => {
   }, []);
 
   const handleSetCode = async () => {
-    document.getElementById("requirements")?.scrollIntoView();
-    const deployMateHeader =
-      "#######################################################################################################################################\n#                               *****      *****      *****      DEPLOYMATE      *****      *****      *****                          #\n#######################################################################################################################################\n\n # enter your code below:\n\n";
-    let cleanedCode = code;
-
-    if (code.includes(deployMateHeader)) {
-      const cleanedCode = code.replace(deployMateHeader, "");
-      setCode(cleanedCode);
+    document.getElementById("requirements")?.scrollIntoView({ behavior: 'smooth' });
+  
+    if (!code.trim()) {
+      setRequirements(["Please enter valid code."]);
+      setCodeValid(false);
+      return;
     }
-
+  
+    let cleanedCode = code;
+    if (code === deployMateHeader) {
+      setRequirements(["Please enter valid code."]);
+      setCodeValid(false);
+      return;
+    }
+  
+    if (!cleanedCode) {
+      setRequirements(["Please enter valid code."]);
+      setCodeValid(false);
+      return;
+    }
+  
     const MAX_TOKENS = 3000; 
     if (cleanedCode.length > MAX_TOKENS) {
       cleanedCode = cleanedCode.substring(0, MAX_TOKENS);
     }
-
+  
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/generate-requirements",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ code }),
-        }
-      );
-
+      const response = await fetch("http://localhost:8080/api/generate-requirements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: cleanedCode }),
+      });
+  
       if (response.ok) {
         const result = await response.json();
         setCodeValid(true);
         setRequirements(result.requirements);
       } else {
-        console.log("Failed to fetch server response.");
+        setRequirements(["Failed to fetch server response."]);
+        setCodeValid(false);
       }
     } catch (error) {
       console.error("Error: ", error);
+      setRequirements(["An error occurred while processing your request."]);
+      setCodeValid(false);
     }
   };
+  
 
   const handleDownloadRequirement = async () => {
-    console.log("download logic");
-  };
+    const element = document.createElement("a");
+    const file = new Blob([requirements.join("\n")], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = "requirements.txt";
+    document.body.appendChild(element); 
+    element.click();
+    document.body.removeChild(element); 
+  }
 
   const handlePasteCode = async () => {
     try {
@@ -73,6 +94,13 @@ export const LandingPage = () => {
     } catch (error) {
       console.error("Failed to read clipboard contents: ", error);
     }
+  };
+
+  const handleAgainButton = () => {
+    window.scrollTo({ top: 0 });
+    setCode(deployMateHeader);
+    setCodeValid(false);
+    setRequirements([]);
   };
 
   return (
@@ -117,6 +145,13 @@ export const LandingPage = () => {
               className="w-64 rounded-lg bg-white text-black"
             >
               Download Requirements.txt
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleAgainButton}
+              className="w-64 rounded-lg bg-white text-black"
+            >
+              Generate Another
             </Button>
           </div>
         </section>
