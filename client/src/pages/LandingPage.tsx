@@ -113,17 +113,10 @@ export const LandingPage = () => {
           <div className="flex flex-row gap-10 mt-4 z-20 pt-20">
             <Button
               variant="outline"
-              onClick={handleSetCode}
-              className="w-64 rounded-lg bg-white text-black"
-            >
-              Generate
-            </Button>
-            <Button
-              variant="outline"
               onClick={handleDownloadRequirement}
               className="w-64 rounded-lg bg-white text-black"
             >
-              Download
+              Download Requirements.txt
             </Button>
           </div>
         </section>
