@@ -20,6 +20,12 @@ type ResponseBody struct {
 	Requirements []string `json:"requirements"`
 }
 
+func enableCors(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", viper.GetString("LOCAL_HOST"))
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+}
+
 func main() {
 	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
@@ -35,6 +41,11 @@ func main() {
 	client := openai.NewClient(apiKey)
 
 	http.HandleFunc("/api/generate-requirements", func(w http.ResponseWriter, r *http.Request) {
+		enableCors(w)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 		if r.Method != http.MethodPost {
 			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 			return
@@ -81,9 +92,7 @@ func main() {
 
 		output := strings.TrimSpace(outputBuilder.String())
 
-		// Split the ouput into an array of strings, one for each line
 		requirements := strings.Split(output, "\n")
-		// Trim any leading or trailing whitespace from each line
 		for i := range requirements {
 			requirements[i] = strings.TrimSpace(requirements[i])
 		}
@@ -101,7 +110,6 @@ func main() {
 		w.Write(respJSON)
 	})
 
-	// Serve React app
 	fs := http.FileServer(http.Dir("../client/dist"))
 	http.Handle("/", fs)
 
