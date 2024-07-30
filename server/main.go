@@ -21,7 +21,7 @@ type ResponseBody struct {
 }
 
 func enableCors(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", viper.GetString("LOCAL_HOST"))
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 }
@@ -113,6 +113,6 @@ func main() {
 	fs := http.FileServer(http.Dir("../client/dist"))
 	http.Handle("/", fs)
 
-	log.Println("Server started on: http://localhost:8080")
+	log.Println("Server started on port: 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

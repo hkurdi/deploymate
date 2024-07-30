@@ -6,6 +6,14 @@ import "prismjs/components/prism-python";
 import "prismjs/themes/prism-dark.css";
 import { Sandbox } from "../components/ui/sandbox";
 import { NavBar } from "../components/navbar";
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardContent,
+  CardFooter
+} from "~/components/ui/card";
+import { Textarea } from "~/components/ui/textarea";
 
 export const LandingPage = () => {
   const [code, setCode] = useState<string>("");
@@ -29,7 +37,7 @@ export const LandingPage = () => {
     document.getElementById("requirements")?.scrollIntoView({ behavior: 'smooth' });
   
     if (!code.trim()) {
-      setRequirements(["Please enter valid code."]);
+      setRequirements(["Please enter valid code above."]);
       setCodeValid(false);
       return;
     }
@@ -53,7 +61,7 @@ export const LandingPage = () => {
     }
   
     try {
-      const response = await fetch("http://localhost:8080/api/generate-requirements", {
+      const response = await fetch("/api/generate-requirements", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,21 +115,21 @@ export const LandingPage = () => {
     <div className="relative">
       <div className="bg-[#f4eaea] min-h-screen overflow-x-hidden">
         <NavBar />
-        <section className="flex flex-col items-center justify-center text-black font-mono">
-          <h2 className="text-2xl py-10">Step 1: Insert your code here:</h2>
+        <section className="flex flex-col items-center justify-center font-mono text-black">
+          <h2 className="py-10 text-2xl">Step 1: Insert your code here:</h2>
           <Sandbox setCode={setCode} code={code} />
-          <div className="flex flex-row gap-10 mt-4 z-20">
+          <div className="z-20 flex gap-10 mt-4">
             <Button
               variant="outline"
               onClick={handlePasteCode}
-              className="w-64 rounded-lg bg-white text-black"
+              className="w-64"
             >
               Paste Code
             </Button>
             <Button
               variant="outline"
               onClick={handleSetCode}
-              className="w-64 rounded-lg bg-white text-black"
+              className="w-64"
             >
               Generate
             </Button>
@@ -129,31 +137,41 @@ export const LandingPage = () => {
         </section>
         <section
           id="requirements"
-          className="min-h-screen flex flex-col items-center justify-center text-black font-mono"
+          className="flex flex-col items-center justify-center min-h-screen font-mono text-black"
         >
-          <div className="text-center">
-            <h1 className="text-4xl font-bold">
-              {isCodeValid
-                ? requirements.join("\n")
-                : "Please enter valid code."}
-            </h1>
-          </div>
-          <div className="flex flex-row gap-10 mt-4 z-20 pt-20">
-            <Button
-              variant="outline"
-              onClick={handleDownloadRequirement}
-              className="w-64 rounded-lg bg-white text-black"
-            >
-              Download Requirements.txt
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleAgainButton}
-              className="w-64 rounded-lg bg-white text-black"
-            >
-              Generate Another
-            </Button>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-4xl font-bold">
+                {isCodeValid ? "Requirements.txt" : "Please enter valid code."}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className='flex items-center py-4'>
+              <Textarea 
+                value={requirements.join("\n")}
+                className="w-full"
+                rows={10}
+                readOnly
+              />
+            </CardContent>
+            <CardFooter className="flex items-center gap-4 py-10">
+              <Button
+                variant="default"
+                onClick={handleDownloadRequirement}
+                className="flex-1"
+              >
+                Download Requirements.txt
+              </Button>
+              <Button
+                variant="default"
+                onClick={handleAgainButton}
+                className="flex-1"
+              >
+                Generate Another
+              </Button>
+            </CardFooter>
+          </Card>
+          {/* <div className="z-20 flex flex-row gap-10 pt-20 mt-4">
+          </div> */}
         </section>
       </div>
     </div>
