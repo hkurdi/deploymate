@@ -20,9 +20,12 @@ type ResponseBody struct {
 }
 
 func enableCors(c *fiber.Ctx) error {
-	c.Set("Access-Control-Allow-Origin", "*")
+	c.Set("Access-Control-Allow-Origin", os.Getenv("DEPLOYMATE_FE_DOMAIN"))
 	c.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	if c.Method() == fiber.MethodOptions {
+		return c.SendStatus(fiber.StatusOK)
+	}
 	return c.Next()
 }
 
@@ -40,10 +43,6 @@ func main() {
 	app.Use(enableCors)
 
 	app.Post("/api/generate-requirements", func(c *fiber.Ctx) error {
-		if c.Method() == fiber.MethodOptions {
-			return c.SendStatus(fiber.StatusOK)
-		}
-
 		var reqBody RequestBody
 		if err := c.BodyParser(&reqBody); err != nil {
 			return c.Status(fiber.StatusBadRequest).SendString("Failed to parse request body")
