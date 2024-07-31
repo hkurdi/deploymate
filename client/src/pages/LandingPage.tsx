@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { Button } from "../components/ui/button";
 import Prism from "prismjs";
 import "prismjs/components/prism-python";
@@ -61,7 +60,7 @@ export const LandingPage = () => {
     }
   
     try {
-      const response = await fetch("http://localhost:8080/api/generate-requirements", {
+      const response = await fetch(`${process.env.DEPLOYMATE_API_URL}/api/generate-requirements`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
