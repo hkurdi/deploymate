@@ -1,6 +1,6 @@
 module github.com/hkurdi/deploymate
 
-go 1.23
+go 1.22
 
 require (
 	github.com/sashabaranov/go-openai v1.26.3
