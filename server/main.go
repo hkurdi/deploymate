@@ -20,7 +20,8 @@ type ResponseBody struct {
 }
 
 func enableCors(c *fiber.Ctx) error {
-	c.Set("Access-Control-Allow-Origin", os.Getenv("DEPLOYMATE_FE_DOMAIN"))
+	origin := strings.TrimSuffix(os.Getenv("DEPLOYMATE_FE_DOMAIN"), "/")
+	c.Set("Access-Control-Allow-Origin", origin)
 	c.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	if c.Method() == fiber.MethodOptions {
