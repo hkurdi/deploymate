@@ -6,10 +6,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
-	"github.com/spf13/viper"
 )
 
 type RequestBody struct {
@@ -27,12 +27,7 @@ func enableCors(w http.ResponseWriter) {
 }
 
 func main() {
-	viper.SetConfigFile(".env")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatalf("Error reading .env file: %v", err)
-	}
-	apiKey := viper.GetString("API_KEY")
+	apiKey := os.Getenv("API_KEY")
 
 	if apiKey == "" {
 		panic("FAILURE: API KEY IS MISSING")
