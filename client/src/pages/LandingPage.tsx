@@ -60,7 +60,7 @@ export const LandingPage = () => {
     }
   
     try {
-      const response = await fetch(`${process.env.DEPLOYMATE_API_URL}/api/generate-requirements`, {
+      const response = await fetch(`${import.meta.env.VITE_DEPLOYMATE_API_URL}/api/generate-requirements`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
