@@ -169,8 +169,6 @@ export const LandingPage = () => {
               </Button>
             </CardFooter>
           </Card>
-          {/* <div className="z-20 flex flex-row gap-10 pt-20 mt-4">
-          </div> */}
         </section>
       </div>
     </div>
