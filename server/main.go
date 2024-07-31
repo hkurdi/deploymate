@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -20,10 +19,11 @@ type ResponseBody struct {
 	Requirements []string `json:"requirements"`
 }
 
-func enableCors(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+func enableCors(c *fiber.Ctx) error {
+	c.Set("Access-Control-Allow-Origin", "*")
+	c.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	return c.Next()
 }
 
 func main() {
@@ -35,28 +35,18 @@ func main() {
 
 	client := openai.NewClient(apiKey)
 
-	http.HandleFunc("/api/generate-requirements", func(w http.ResponseWriter, r *http.Request) {
-		enableCors(w)
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		if r.Method != http.MethodPost {
-			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-			return
+	app := fiber.New()
+
+	app.Use(enableCors)
+
+	app.Post("/api/generate-requirements", func(c *fiber.Ctx) error {
+		if c.Method() == fiber.MethodOptions {
+			return c.SendStatus(fiber.StatusOK)
 		}
 
 		var reqBody RequestBody
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "Failed to read request body", http.StatusInternalServerError)
-			return
-		}
-
-		err = json.Unmarshal(body, &reqBody)
-		if err != nil {
-			http.Error(w, "Failed to parse request body", http.StatusBadRequest)
-			return
+		if err := c.BodyParser(&reqBody); err != nil {
+			return c.Status(fiber.StatusBadRequest).SendString("Failed to parse request body")
 		}
 
 		ctx := context.Background()
@@ -95,19 +85,20 @@ func main() {
 		respBody := ResponseBody{Requirements: requirements}
 		respJSON, err := json.Marshal(respBody)
 		if err != nil {
-			http.Error(w, "Failed to create response", http.StatusInternalServerError)
-			log.Println(err)
-			return
+			return c.Status(fiber.StatusInternalServerError).SendString("Failed to create response")
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		log.Println("Response:", string(respJSON))
-		w.Write(respJSON)
+		return c.JSON(respBody)
 	})
 
-	fs := http.FileServer(http.Dir("../client/dist"))
-	http.Handle("/", fs)
+	app.Static("/", "../client/dist")
 
-	log.Println("Server started on port: 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	log.Printf("Server started on port %s", port)
+	log.Fatal(app.Listen(":" + port))
 }
