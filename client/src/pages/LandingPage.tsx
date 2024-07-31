@@ -61,7 +61,7 @@ export const LandingPage = () => {
     }
   
     try {
-      const response = await fetch("/api/generate-requirements", {
+      const response = await fetch("http://localhost:8080/api/generate-requirements", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +116,7 @@ export const LandingPage = () => {
       <div className="bg-[#f4eaea] min-h-screen overflow-x-hidden">
         <NavBar />
         <section className="flex flex-col items-center justify-center font-mono text-black">
-          <h2 className="py-10 text-2xl">Step 1: Insert your code here:</h2>
+          <h2 className="py-10 text-2xl">insert your code here.</h2>
           <Sandbox setCode={setCode} code={code} />
           <div className="z-20 flex gap-10 mt-4">
             <Button
@@ -147,8 +147,8 @@ export const LandingPage = () => {
             </CardHeader>
             <CardContent className='flex items-center py-4'>
               <Textarea 
-                value={requirements.join("\n")}
-                className="w-full"
+                value={isCodeValid ? requirements.join("\n") : ""}
+                className="w-full resize-none"
                 rows={10}
                 readOnly
               />
